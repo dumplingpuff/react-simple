@@ -10,7 +10,6 @@
 
     <script src="https://cdn.jsdelivr.net/react/0.14.0-rc1/react.js"></script>
     <script src="https://cdn.jsdelivr.net/react/0.14.0-rc1/react-dom.js"></script>
-    <script src="index.js"></script>
     <script>
     // Components
 
@@ -37,18 +36,21 @@
         },
         render: function() {
           return (
-            React.createElement('form', {className:'contact-form'},
+            React.createElement('form', {className:'ContactForm'},
               React.createElement('input', {
+                className:'ContactForm-name',
                 placeholder:'Name (is required)',
                 type:'text',
                 value: this.props.contact.name
               }),
               React.createElement('input', {
+                className:'ContactForm-email',
                 placeholder:'Email (is required)',
                 type:'email',
                 value: this.props.contact.email
               }),
               React.createElement('textarea',{
+                className:'ContactForm-description',
                 placeholder:'Description',
                 value: this.props.contact.description
               }),
@@ -72,9 +74,9 @@
           })
 
           return (
-            React.createElement('div', {},
-              React.createElement('h1',  {}, "Contacts"),
-              React.createElement('ul', {}, listElements),
+            React.createElement('div', {className:"ContactView"},
+              React.createElement('h1',  {className:"ContactView-title"}, "Contacts"),
+              React.createElement('ul', {className:"ContactView-list"}, listElements),
               React.createElement(ContactForm, {contact: this.props.newContact})
               // React.createElement(ContactForm, {contact:{name:"", email:"", description:""}})
             )
