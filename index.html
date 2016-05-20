@@ -32,27 +32,47 @@
 
       var ContactForm = React.createClass({
         propTypes: {
-          contact: React.PropTypes.object.isRequired
+          value: React.PropTypes.object.isRequired,
+          onChange: React.PropTypes.func.isRequired,
+          onSubmit: React.PropTypes.func.isRequired,
         },
+        onChangeName: function(e) {
+          this.props.onChange(Object.assign({}, this.props.value, {name: e.target.value}))
+        },
+        onChangeEmail: function(e) {
+          this.props.onChange(Object.assign({}, this.props.value, {email: e.target.value}))
+        },
+        onChangeDescription: function(e) {
+          this.props.onChange(Object.assign({}, this.props.value, {description: e.target.value}))
+        },
+
+        onSubmit: function(e) {
+          e.preventDefault();
+          this.props.onSubmit();
+        },
+
         render: function() {
+          var error = this.props.value.errors || {};
           return (
-            React.createElement('form', {className:'ContactForm'},
+            React.createElement('form', {onSubmit: this.onSubmit,className:'ContactForm'},
               React.createElement('input', {
-                className:'ContactForm-name',
+                className:error.name &&'ContactForm-error',
                 placeholder:'Name (is required)',
                 type:'text',
-                value: this.props.contact.name
+                value: this.props.value.name,
+                onChange: this.onChangeName,
               }),
               React.createElement('input', {
-                className:'ContactForm-email',
+                className:error.email && 'ContactForm-error',
                 placeholder:'Email (is required)',
                 type:'email',
-                value: this.props.contact.email
+                value: this.props.value.email,
+                onChange: this.onChangeEmail,
               }),
               React.createElement('textarea',{
-                className:'ContactForm-description',
                 placeholder:'Description',
-                value: this.props.contact.description
+                value: this.props.value.description,
+                onChange: this.onChangeDescription,
               }),
               React.createElement('button',{type:'submit'}, 'Submit')
             )
@@ -64,10 +84,12 @@
         propTypes: {
           contacts: React.PropTypes.array.isRequired,
           newContact: React.PropTypes.object.isRequired,
+          onContactChange: React.PropTypes.func.isRequired,
+          submitNewContact: React.PropTypes.func.isRequired,
         },
         render: function(){
 
-          var listElements = contacts.filter(function(contact) {
+          var listElements = this.props.contacts.filter(function(contact) {
             return contact.email
           }).map(function(contact) {
             return React.createElement(ContactItem, contact)
@@ -77,29 +99,81 @@
             React.createElement('div', {className:"ContactView"},
               React.createElement('h1',  {className:"ContactView-title"}, "Contacts"),
               React.createElement('ul', {className:"ContactView-list"}, listElements),
-              React.createElement(ContactForm, {contact: this.props.newContact})
+              React.createElement(ContactForm, {
+                value: this.props.newContact,
+                onChange: this.props.onContactChange,
+                onSubmit: this.props.submitNewContact,
+              })
               // React.createElement(ContactForm, {contact:{name:"", email:"", description:""}})
             )
           )
         }
       })
 
-      // Data
-        var contacts = [
-          {key: 1, name: "James K Nelson", email: "james@jamesknelson.com", description: "Front-end Unicorn"},
-          {key: 2, name: "Jim", email: "jim@example.com"},
-          {key: 3, name: "Joe"},
-        ]
+      // Actions
 
-        var newContact = {name: "", email: "", description: ""}
+      var updateContact = function(contact) {
+        setState({ newContact: contact})
+      }
+
+      var blank = {name: "", email: "", description: "", errors:null};
+
+      function makeNewContact() {
+
+        var contact = Object.assign({}, state.newContact, {key: state.contacts.length + 1, errors: {}});
+        console.log(contact)
+        console.log(state.contacts);
+        if(!contact.name) {
+          contact.errors.name = ["Where's yo name?!"]
+        }
+        if(!/.+@.+\..+/.test(contact.email)) {
+          contact.errors.email = ["Email son!"]
+        }
+        setState(
+          Object.keys(contact.errors) === 0 ?
+          {newContact: Object.assign({}, blank),
+          contacts: state.contacts.concat(contact),}
+          : {newContact: contact}
+        )
+      }
 
 
-      // Data - end
+      // App State
 
-      ReactDOM.render(React.createElement(ContactView,{
-        contacts: contacts,
-        newContact: newContact
-      }), document.getElementById('react-app'))
+      var state = {};
+
+      function setState(changes) {
+        Object.assign(state, changes);
+        console.log(state.contacts);
+        ReactDOM.render(
+          React.createElement(ContactView, Object.assign({}, state, {
+          onContactChange: updateContact,
+          submitNewContact: makeNewContact,
+        })),
+        document.getElementById('react-app')
+  );
+}
+
+
+
+      // // Data
+      //   var contacts = [
+      //     {key: 1, name: "James K Nelson", email: "james@jamesknelson.com", description: "Front-end Unicorn"},
+      //     {key: 2, name: "Jim", email: "jim@example.com"},
+      //     {key: 3, name: "Joe"},
+      //   ]
+      //
+      //   var newContact = {name: "", email: "", description: ""}
+      // // Data - end
+
+      setState({
+        contacts: [
+            {key: 1, name: "James K Nelson", email: "james@jamesknelson.com", description: "Front-end Unicorn"},
+            {key: 2, name: "Jim", email: "jim@example.com"},
+          ],
+          newContact: {name: "", email: "", description: ""},
+        });
+
 
 
     </script>
